@@ -1,4 +1,6 @@
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
+from pathlib import Path
 
 from modules.navegador import Navegador
 from modules.login import Login
@@ -54,17 +56,14 @@ def main():
         for empresa in empresas:
 
             numero_empresa = empresa["empresa"]
-            
+
             nome_empresa = empresa.get("nome", "")
 
             cnpj = empresa["cnpj"]
 
             nfe_status = "ERRO"
-
             nfce_status = "Não executado"
-
             status_final = "Revisar"
-
             observacao = ""
 
             print("\n" + "=" * 60)
@@ -86,14 +85,35 @@ def main():
 
                 print("\nExportando NF-e...")
 
+                # Competência = mês anterior
+                competencia = (
+                    datetime.today().replace(day=1)
+                    - relativedelta(months=1)
+                ).strftime("%Y-%m")
+
+                if nome_empresa and nome_empresa.lower() != "nan":
+                    nome_pasta = f"{numero_empresa} - {nome_empresa}"
+                else:
+                    nome_pasta = str(numero_empresa)
+
+                pasta_competencia = (
+                    Path(r"Z:\SAT\downloads")
+                    / nome_pasta
+                    / competencia
+                )
+
+                # Se já existe o arquivo OK, pula a empresa
+                if (pasta_competencia / "OK").exists():
+
+                    print(
+                        f"\nEmpresa {numero_empresa} já possui OK para {competencia}. Pulando..."
+                    )
+
+                    continue
+
                 consulta.consultar_tipo(
                     "NF-e"
                 )
-
-                competencia = datetime.strptime(
-                    consulta.data_inicio,
-                    "%d/%m/%Y"
-                ).strftime("%Y-%m")
 
                 Exportacao(page).abrir()
 
@@ -114,9 +134,7 @@ def main():
 
             except Exception as erro:
 
-                observacao = (
-                    f"Erro NF-e: {erro}"
-                )
+                observacao = f"Erro NF-e: {erro}"
 
                 print(
                     observacao
@@ -133,8 +151,10 @@ def main():
                 )
 
                 continue
-
+        
+            # -------------------------------------------------
             # Volta para consulta
+            # -------------------------------------------------
 
             consulta.abrir_consulta()
 
@@ -167,8 +187,6 @@ def main():
 
                 nfce_status = "OK"
 
-                status_final = "Concluído"
-
                 print(
                     "\nNFC-e concluída."
                 )
@@ -177,17 +195,26 @@ def main():
 
                 nfce_status = "Sem NFC-e"
 
-                status_final = "Concluído"
-
-                observacao = str(
-                    erro
-                )
-
                 print(
-                    f"NFC-e não disponível: {erro}"
+                    f"\nNFC-e não disponível: {erro}"
                 )
 
-            # Salva resultado da empresa
+            # -------------------------------------------------
+            # Empresa concluída
+            # -------------------------------------------------
+
+            status_final = "Concluído"
+
+            pasta_competencia.mkdir(
+                parents=True,
+                exist_ok=True
+            )
+
+            (pasta_competencia / "OK").touch()
+
+            # -------------------------------------------------
+            # Salva relatório
+            # -------------------------------------------------
 
             relatorio.adicionar(
                 numero_empresa,
@@ -199,7 +226,9 @@ def main():
                 observacao
             )
 
+            # -------------------------------------------------
             # Volta para próxima empresa
+            # -------------------------------------------------
 
             consulta.abrir_consulta()
 
@@ -239,8 +268,6 @@ def main():
                 pass
 
     finally:
-
-        # Salva relatório mesmo com erro
 
         relatorio.salvar()
 
