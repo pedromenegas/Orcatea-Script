@@ -131,10 +131,10 @@ empresas.xlsx
 
 Modelo:
 
-| Empresa | CNPJ |
-|---------:|----------------|
-| 1001 | 00000000000000 |
-| 1002 | 11111111111111 |
+| Empresa | Nome | CNPJ |
+|---------:|:-------------|----------------|
+| 1001 | Empresa Alpha | 00000000000000 |
+| 1002 | Empresa Beta | 11111111111111 |
 
 ---
 
@@ -191,7 +191,7 @@ Os arquivos são salvos automaticamente na seguinte estrutura:
 ```text
 Z:\SAT\downloads
 │
-├── Empresa
+├── 1001 - Empresa Alpha
 │   ├── 2026-06
 │   │      NFE.xlsx
 │   │      NFCE.xlsx
@@ -210,6 +210,7 @@ Z:\SAT\downloads
 Ao término da execução é gerado um relatório contendo:
 
 - Empresa
+- Nome
 - CNPJ
 - Status da NF-e
 - Status da NFC-e
