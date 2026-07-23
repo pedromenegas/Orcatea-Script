@@ -54,6 +54,8 @@ def main():
         for empresa in empresas:
 
             numero_empresa = empresa["empresa"]
+            
+            nome_empresa = empresa.get("nome", "")
 
             cnpj = empresa["cnpj"]
 
@@ -66,7 +68,7 @@ def main():
             observacao = ""
 
             print("\n" + "=" * 60)
-            print(f"Empresa: {numero_empresa}")
+            print(f"Empresa: {numero_empresa} - {nome_empresa}")
             print(f"CNPJ    : {cnpj}")
             print("=" * 60)
 
@@ -100,7 +102,8 @@ def main():
                     numero_empresa,
                     cnpj,
                     "NF-e",
-                    competencia
+                    competencia,
+                    nome_empresa
                 ).executar()
 
                 nfe_status = "OK"
@@ -121,6 +124,7 @@ def main():
 
                 relatorio.adicionar(
                     numero_empresa,
+                    nome_empresa,
                     cnpj,
                     nfe_status,
                     nfce_status,
@@ -157,7 +161,8 @@ def main():
                     numero_empresa,
                     cnpj,
                     "NFC-e",
-                    competencia
+                    competencia,
+                    nome_empresa
                 ).executar()
 
                 nfce_status = "OK"
@@ -186,6 +191,7 @@ def main():
 
             relatorio.adicionar(
                 numero_empresa,
+                nome_empresa,
                 cnpj,
                 nfe_status,
                 nfce_status,

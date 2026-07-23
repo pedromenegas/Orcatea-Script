@@ -47,6 +47,13 @@ class Empresas:
             )
 
 
+        if "nome" not in colunas:
+
+            raise Exception(
+                "A coluna 'Nome' não foi encontrada."
+            )
+
+
         coluna_empresa = df.columns[
             colunas.index("empresa")
         ]
@@ -54,6 +61,11 @@ class Empresas:
 
         coluna_cnpj = df.columns[
             colunas.index("cnpj")
+        ]
+
+
+        coluna_nome = df.columns[
+            colunas.index("nome")
         ]
 
 
@@ -70,6 +82,11 @@ class Empresas:
 
             cnpj = str(
                 linha[coluna_cnpj]
+            ).strip()
+
+
+            nome = str(
+                linha[coluna_nome]
             ).strip()
 
 
@@ -99,7 +116,8 @@ class Empresas:
             empresas.append(
                 {
                     "empresa": empresa,
-                    "cnpj": cnpj
+                    "cnpj": cnpj,
+                    "nome": nome
                 }
             )
 

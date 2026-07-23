@@ -20,6 +20,7 @@ class Relatorio:
     def adicionar(
         self,
         empresa,
+        nome,
         cnpj,
         nfe,
         nfce,
@@ -31,6 +32,7 @@ class Relatorio:
         self.registros.append(
             {
                 "Empresa": str(empresa),
+                "Nome": str(nome),
                 "CNPJ": str(cnpj),
                 "NF-e": nfe,
                 "NFC-e": nfce,

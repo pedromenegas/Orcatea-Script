@@ -3,7 +3,7 @@ from pathlib import Path
 
 class Download:
 
-    def __init__(self, page, empresa, cnpj, tipo, competencia):
+    def __init__(self, page, empresa, cnpj, tipo, competencia, nome_empresa=""):
 
         self.page = page
 
@@ -13,9 +13,16 @@ class Download:
 
         self.tipo = tipo
 
+        self.nome_empresa = str(nome_empresa).strip()
+        
+        if self.nome_empresa and self.nome_empresa.lower() != "nan":
+            nome_pasta = f"{self.empresa} - {self.nome_empresa}"
+        else:
+            nome_pasta = self.empresa
+
         self.pasta_destino = (
             Path(r"Z:\SAT\downloads")
-            / self.empresa
+            / nome_pasta
             / competencia
         )
 
