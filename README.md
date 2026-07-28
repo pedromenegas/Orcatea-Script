@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🚀 SAT RPA 1.0
+# 🚀 SAT RPA 1.0.1
 
 ### Automação Inteligente para Exportação de NF-e e NFC-e
 **Portal SAT • Secretaria da Fazenda de Santa Catarina**
@@ -250,7 +250,7 @@ Projeto desenvolvido para automação interna do Portal SAT da Secretaria da Faz
 
 <div align="center">
 
-## 🚀 SAT RPA 1.0
+## 🚀 SAT RPA 1.0.1
 
 **Automatizando processos fiscais com rapidez, organização e confiabilidade.**
 
