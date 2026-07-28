@@ -11,7 +11,7 @@ class Relatorio:
         self.registros = []
 
         self.pasta = Path(
-            r"Z:\SAT\relatorios"
+            r"d:\sat\relatorios"
         )
 
 

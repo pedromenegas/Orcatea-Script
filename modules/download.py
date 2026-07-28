@@ -21,14 +21,14 @@ class Download:
             nome_pasta = self.empresa
 
         self.pasta_destino = (
-            Path(r"Z:\SAT\downloads")
+            Path(r"d:\sat\downloads")
             / nome_pasta
             / competencia
         )
 
     # -----------------------------------------------------
 
-    def localizar_solicitacao(self, timeout=300):
+    def localizar_solicitacao(self, timeout=30):
 
         print("\nLocalizando solicitação...")
 
@@ -71,7 +71,7 @@ class Download:
                 return linha
 
             self.page.wait_for_timeout(
-                1000
+                2000
             )
 
             tempo += 1
@@ -80,7 +80,7 @@ class Download:
 
     # -----------------------------------------------------
 
-    def aguardar_download_disponivel(self, linha, timeout=300):
+    def aguardar_download_disponivel(self, linha, timeout=2000):
 
         print(
             "\nVerificando disponibilidade do download..."
@@ -121,7 +121,7 @@ class Download:
             self.page.reload()
 
             self.page.wait_for_timeout(
-                2000
+                5000
             )
 
             nova_linha = self.localizar_solicitacao(
@@ -218,14 +218,16 @@ class Download:
         else:
 
             linha = self.localizar_solicitacao(
-                timeout=300
+                timeout=15
             )
 
             if linha is None:
 
-                raise Exception(
-                    "NF-e não encontrada."
+                print(
+                    "NF-e não encontrada. Pulando."
                 )
+
+                return False
 
         botao = self.aguardar_download_disponivel(
             linha
@@ -241,9 +243,11 @@ class Download:
 
                 return
 
-            raise Exception(
-                "NF-e não ficou disponível para download."
+            print(
+                "NF-e não ficou disponível para download. Pulando."
             )
+
+            return False
 
         self.baixar(
             botao
@@ -252,3 +256,5 @@ class Download:
         print(
             "\nDownload concluído."
         )
+
+        return True

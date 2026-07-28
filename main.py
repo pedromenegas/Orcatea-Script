@@ -97,7 +97,7 @@ def main():
                     nome_pasta = str(numero_empresa)
 
                 pasta_competencia = (
-                    Path(r"Z:\SAT\downloads")
+                    Path(r"d:\sat\downloads")
                     / nome_pasta
                     / competencia
                 )
@@ -117,7 +117,7 @@ def main():
 
                 Exportacao(page).abrir()
 
-                Download(
+                resultado_nfe = Download(
                     page,
                     numero_empresa,
                     cnpj,
@@ -126,7 +126,10 @@ def main():
                     nome_empresa
                 ).executar()
 
-                nfe_status = "OK"
+                if resultado_nfe:
+                    nfe_status = "OK"
+                else:
+                    nfe_status = "Sem NF-e"
 
                 print(
                     "\nNF-e concluída."
@@ -140,17 +143,7 @@ def main():
                     observacao
                 )
 
-                relatorio.adicionar(
-                    numero_empresa,
-                    nome_empresa,
-                    cnpj,
-                    nfe_status,
-                    nfce_status,
-                    status_final,
-                    observacao
-                )
-
-                continue
+                print("Continuando para NFC-e...")
         
             # -------------------------------------------------
             # Volta para consulta
@@ -159,7 +152,7 @@ def main():
             consulta.abrir_consulta()
 
             page.wait_for_timeout(
-                2000
+                7000
             )
 
             # ==========================================
@@ -280,4 +273,4 @@ def main():
 
 if __name__ == "__main__":
 
-    main()
+    main()  
