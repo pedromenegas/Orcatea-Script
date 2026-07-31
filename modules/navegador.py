@@ -1,13 +1,19 @@
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 import json
+import sys
 
 
 class Navegador:
 
     def __init__(self):
 
-        self.base_dir = Path(__file__).resolve().parent.parent
+        if getattr(sys, "frozen", False):
+            # Executando como .exe
+            self.base_dir = Path(sys.executable).parent
+        else:
+            # Executando pelo Python
+            self.base_dir = Path(__file__).resolve().parent.parent
 
         with open(self.base_dir / "config.json", "r", encoding="utf-8") as arquivo:
             self.config = json.load(arquivo)
@@ -44,9 +50,6 @@ class Navegador:
         return self.page
 
     def fechar(self):
-
-        # Não fechamos o Chrome do usuário.
-        # Apenas encerramos a conexão do Playwright.
 
         if self.playwright:
             self.playwright.stop()

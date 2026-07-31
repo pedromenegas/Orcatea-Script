@@ -1,4 +1,5 @@
 from pathlib import Path
+import sys
 
 import pandas as pd
 
@@ -7,7 +8,14 @@ class Empresas:
 
     def __init__(self, arquivo="empresas.xlsx"):
 
-        self.arquivo = Path(arquivo)
+        if getattr(sys, "frozen", False):
+            # Executando como .exe
+            base = Path(sys.executable).parent
+        else:
+            # Executando pelo Python
+            base = Path(__file__).resolve().parent.parent
+
+        self.arquivo = base / arquivo
 
     # ---------------------------------------------------------
 
@@ -19,19 +27,16 @@ class Empresas:
                 f"Arquivo não encontrado: {self.arquivo}"
             )
 
-
         # Lê tudo como texto para não alterar CNPJ
         df = pd.read_excel(
             self.arquivo,
             dtype=str
         )
 
-
         colunas = [
             str(c).strip().lower()
             for c in df.columns
         ]
-
 
         if "empresa" not in colunas:
 
@@ -39,13 +44,11 @@ class Empresas:
                 "A coluna 'Empresa' não foi encontrada."
             )
 
-
         if "cnpj" not in colunas:
 
             raise Exception(
                 "A coluna 'CNPJ' não foi encontrada."
             )
-
 
         if "nome" not in colunas:
 
@@ -53,45 +56,35 @@ class Empresas:
                 "A coluna 'Nome' não foi encontrada."
             )
 
-
         coluna_empresa = df.columns[
             colunas.index("empresa")
         ]
-
 
         coluna_cnpj = df.columns[
             colunas.index("cnpj")
         ]
 
-
         coluna_nome = df.columns[
             colunas.index("nome")
         ]
 
-
         empresas = []
 
-
         for _, linha in df.iterrows():
-
 
             empresa = str(
                 linha[coluna_empresa]
             ).strip()
 
-
             cnpj = str(
                 linha[coluna_cnpj]
             ).strip()
-
 
             nome = str(
                 linha[coluna_nome]
             ).strip()
 
-
             # Remove máscara do CNPJ
-
             cnpj = (
                 cnpj
                 .replace(".", "")
@@ -100,18 +93,12 @@ class Empresas:
                 .replace(" ", "")
             )
 
-
             # Corrige valores vazios
-
             if empresa == "" or empresa.lower() == "nan":
-
                 continue
-
 
             if cnpj == "" or cnpj.lower() == "nan":
-
                 continue
-
 
             empresas.append(
                 {
@@ -120,7 +107,6 @@ class Empresas:
                     "nome": nome
                 }
             )
-
 
         return empresas
 
