@@ -1,4 +1,5 @@
 from modules.datas import obter_periodo_mes_anterior
+from modules.captcha import CaptchaSolver
 
 
 class Consulta:
@@ -10,6 +11,9 @@ class Consulta:
         self.empresa = str(empresa)
 
         self.cnpj = str(cnpj)
+
+        # Instância do resolvedor de CAPTCHA
+        self.captcha_solver = CaptchaSolver()
 
         # Guarda o período utilizado na exportação
         self.data_inicio = None
@@ -38,6 +42,19 @@ class Consulta:
 
         self.data_final = (
             "#Body_Main_Main_sepConsultaNfpe_datDataFinal"
+        )
+
+        # CAPTCHA
+        self.imagem_captcha = (
+            "#Body_Main_Main_sepConsultaNfpe_ctl17 img"
+        )
+
+        self.campo_captcha = (
+            "input[name='ctl00$ctl00$ctl00$Body$Main$Main$sepConsultaNfpe$ctl23']"
+        )
+
+        self.btn_recarregar_captcha = (
+            "#Body_Main_Main_sepConsultaNfpe_ctl23_btn0"
         )
 
         # Botão Exportar
@@ -175,28 +192,106 @@ class Consulta:
 
     # ---------------------------------------------------------
 
-    def exportar(self):
+    def resolver_e_submeter_com_validacao(self, tentativas_max=20):
 
-        print(
-            "Exportando..."
-        )
+        for tentativa in range(1, tentativas_max + 1):
 
-        botao = self.page.locator(
-            self.botao_exportar
-        )
+            print(
+                f"\n[CAPTCHA] Tentativa {tentativa} de {tentativas_max}..."
+            )
 
-        botao.wait_for(
-            state="visible"
-        )
+            try:
 
-        botao.click()
+                element_captcha = self.page.locator(
+                    self.imagem_captcha
+                ).first
 
-        print(
-            "Solicitação enviada."
-        )
+                element_captcha.wait_for(
+                    state="visible",
+                    timeout=7000
+                )
 
-        self.page.wait_for_timeout(
-            3000
+                # Pequeno tempo para garantir que a imagem do CAPTCHA estabilizou
+                self.page.wait_for_timeout(500)
+
+                image_bytes = element_captcha.screenshot()
+
+                texto_resolvido = self.captcha_solver.resolver_bytes(
+                    image_bytes
+                )
+
+                print(
+                    f"[CAPTCHA] Texto obtido pelo OCR: '{texto_resolvido}'"
+                )
+
+                # Aceita códigos com números e letras de tamanho consistente (ex: entre 4 e 9 caracteres)
+                if 4 <= len(texto_resolvido) <= 9:
+
+                    self.digitar(
+                        self.campo_captcha,
+                        texto_resolvido
+                    )
+
+                    print(
+                        "[CAPTCHA] Preenchido. Clicando em Exportar..."
+                    )
+
+                    # Clica no botão exportar
+                    botao = self.page.locator(self.botao_exportar)
+                    botao.wait_for(state="visible")
+                    botao.click()
+
+                    self.page.wait_for_timeout(3500)
+
+                    # VERIFICAÇÃO: Se o campo do captcha ainda estiver visível,
+                    # significa que o SAT recusou (código incorreto)
+                    captcha_ainda_visivel = self.page.locator(
+                        self.campo_captcha
+                    ).is_visible()
+
+                    if not captcha_ainda_visivel:
+
+                        print(
+                            "✅ [CAPTCHA VALIDADO] Exportação iniciada com sucesso!"
+                        )
+
+                        return True
+
+                    print(
+                        "❌ [CAPTCHA Incorreto] SAT rejeitou a tentativa. Solicitando nova imagem..."
+                    )
+                else:
+
+                    print(
+                        f"[CAPTCHA] Leitura incompleta ({len(texto_resolvido)} chars). Ignorando envio..."
+                    )
+
+            except Exception as err:
+
+                print(
+                    f"[CAPTCHA Warning] Erro no ciclo: {err}"
+                )
+
+            # Clica no botão de recarregar CAPTCHA para a próxima tentativa
+            try:
+
+                btn_refresh = self.page.locator(
+                    self.btn_recarregar_captcha
+                ).first
+
+                if btn_refresh.is_visible():
+
+                    btn_refresh.click()
+
+                    # Espera a nova imagem carregar no DOM
+                    self.page.wait_for_timeout(2000)
+
+            except Exception:
+
+                pass
+
+        raise Exception(
+            f"Não foi possível validar o CAPTCHA após {tentativas_max} tentativas."
         )
 
     # ---------------------------------------------------------
@@ -229,7 +324,8 @@ class Consulta:
 
         self.preencher_datas()
 
-        self.exportar()
+        # Executa as tentativas de validação do relatório
+        self.resolver_e_submeter_com_validacao(tentativas_max=20)
 
     # ---------------------------------------------------------
 

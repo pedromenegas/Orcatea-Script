@@ -8,14 +8,29 @@ class Empresas:
 
     def __init__(self, arquivo="empresas.xlsx"):
 
-        if getattr(sys, "frozen", False):
-            # Executando como .exe
-            base = Path(sys.executable).parent
-        else:
-            # Executando pelo Python
-            base = Path(__file__).resolve().parent.parent
+        candidatos = []
 
-        self.arquivo = base / arquivo
+        # Primeiro tenta a pasta do projeto/.exe
+        if getattr(sys, "frozen", False):
+            candidatos.append(Path(sys.executable).parent / arquivo)
+        else:
+            candidatos.append(Path(__file__).resolve().parent.parent / arquivo)
+
+        # Depois tenta as unidades de rede
+        candidatos.extend([
+            Path(r"Z:\sat\SAT_RPA") / arquivo,
+            Path(r"D:\sat\SAT_RPA") / arquivo,
+        ])
+
+        for caminho in candidatos:
+            if caminho.exists():
+                self.arquivo = caminho
+                break
+        else:
+            raise FileNotFoundError(
+                "Arquivo não encontrado:\n"
+                + "\n".join(str(c) for c in candidatos)
+            )
 
     # ---------------------------------------------------------
 
